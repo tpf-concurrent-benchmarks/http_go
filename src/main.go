@@ -6,6 +6,7 @@ import (
    ginSwagger "github.com/swaggo/gin-swagger"
    "net/http"
    docs "http_go/docs"
+   "fmt"
 )
 // @BasePath /api/v1
 
@@ -22,6 +23,48 @@ func Helloworld(g *gin.Context)  {
    g.JSON(http.StatusOK,"helloworld")
 }
 
+// @Router /users/:name [get]
+// @Param  name query string true "name"
+func user_exists(c *gin.Context)  {
+	user := c.Request.URL.Query().Get("name")
+	value, ok := db[user]
+	if ok {
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "value": value})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "value": "not found"})
+	}
+}
+
+// addUser adds a username to the database
+// @Summary Add a new user
+// @Description Add a new user to the database
+// @Accept json
+// @Produce json
+// @Param username body string true "Username to add"
+// @Success 200 {string} string "User added successfully"
+// @Failure 400 {string} string "Invalid request payload"
+// @Router /users [post]
+func create_user(c *gin.Context) {
+	var username string
+
+	// Bind JSON request body to username variable
+	if err := c.ShouldBindJSON(&username); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	// Check if username already exists
+	if _, exists := db[username]; exists {
+		c.JSON(400, gin.H{"error": "Username already exists"})
+		return
+	}
+
+	// Add username to the database
+	db[username] = "true"
+
+	c.JSON(200, gin.H{"message": "User added successfully"})
+}
+
 var db = make(map[string]string)
 
 func setupRouter() *gin.Engine {
@@ -33,16 +76,9 @@ func setupRouter() *gin.Engine {
 	// Ping test
 	v1.GET("/ping", Helloworld)
 
-	// Get user value
-	v1.GET("/user/:name", func(c *gin.Context) {
-		user := c.Params.ByName("name")
-		value, ok := db[user]
-		if ok {
-			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
-		}
-	})
+	
+	v1.POST("/users", create_user)
+	v1.GET("/users/:name", user_exists)
 
 	// Authorized group (uses gin.BasicAuth() middleware)
 	// Same than:

@@ -17,4 +17,37 @@ paths:
       summary: ping example
       tags:
       - example
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Add a new user to the database
+      parameters:
+      - description: Username to add
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User added successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+      summary: Add a new user
+  /users/:name:
+    get:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      responses: {}
 swagger: "2.0"
