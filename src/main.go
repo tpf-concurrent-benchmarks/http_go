@@ -7,6 +7,7 @@ import (
    "net/http"
    docs "http_go/docs"
    "fmt"
+   "github.com/golang-jwt/jwt/v5"
 )
 // @BasePath /api/v1
 
