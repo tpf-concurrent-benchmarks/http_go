@@ -1,3 +1,5 @@
+package models
+
 type Option struct {
 	Name  string `json:"name"`
 	Votes int    `json:"votes,omitempty"`
