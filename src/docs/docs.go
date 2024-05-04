@@ -19,21 +19,12 @@ const docTemplate = `{
             "post": {
                 "parameters": [
                     {
-                        "description": "username",
-                        "name": "username",
+                        "description": "Username and hashed password",
+                        "name": "userInDB",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "password",
-                        "name": "password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserInDB"
                         }
                     }
                 ],

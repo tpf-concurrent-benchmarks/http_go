@@ -70,39 +70,42 @@ func create_user(c *gin.Context) {
 }
 
 // @Router /login [post]
-// @Param  username body string true "username"
-// @Param  password body string true "password"
+// @Param userInDB body models.UserInDB true "Username and hashed password"
 // @Success 200 {string} string "access_token"
 // @Failure 400 {string} string "Invalid request body"
-func login(jwtManager *jwt.JWTManager) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var credentials struct {
-			Username string `json:"username"`
-			// Add other fields as needed (e.g., password)
-		}
-		if err := c.ShouldBindJSON(&credentials); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-			return
-		}
+func login(jwtManager *jwt.JWTManager, c *gin.Context) {
+	var user models.UserInDB
 
-		// Validate user credentials (e.g., authenticate against database)
-		// For demonstration, assuming authentication is successful
-		tokenData := map[string]interface{}{
-			"sub": credentials.Username,
-			// Add other claims as needed
-		}
-
-		token, err := jwtManager.CreateJWTToken(tokenData, time.Minute*time.Duration(jwtManager.AccessTokenExpireMinutes))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"access_token": token,
-			"token_type":   "bearer",
-		})
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
 	}
+
+	userPassword, ok := db[user.Username]
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	if userPassword != user.HashedPassword {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	tokenData := map[string]interface{}{
+		"sub": user.Username,
+	}
+
+	token, err := jwtManager.CreateJWTToken(tokenData, time.Minute*time.Duration(jwtManager.AccessTokenExpireMinutes))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token": token,
+		"token_type":   "bearer",
+	})
 }
 
 
@@ -121,7 +124,9 @@ func setupRouter() *gin.Engine {
 
 	
 	v1.POST("/users", create_user)
-	v1.POST("/login", login(jwtManager))
+	v1.POST("/login", func(c *gin.Context) {
+		login(jwtManager, c)
+	})
 	v1.GET("/users/:name", user_exists)
 
 	// Authorized group (uses gin.BasicAuth() middleware)

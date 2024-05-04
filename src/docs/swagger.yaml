@@ -13,18 +13,12 @@ paths:
   /login:
     post:
       parameters:
-      - description: username
+      - description: Username and hashed password
         in: body
-        name: username
+        name: userInDB
         required: true
         schema:
-          type: string
-      - description: password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/models.UserInDB'
       responses:
         "200":
           description: access_token
