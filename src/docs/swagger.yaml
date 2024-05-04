@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   models.UserInDB:
     properties:
@@ -28,21 +27,6 @@ paths:
           description: Invalid request body
           schema:
             type: string
-  /ping:
-    get:
-      consumes:
-      - application/json
-      description: do ping
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: ping example
-      tags:
-      - example
   /users:
     post:
       consumes:

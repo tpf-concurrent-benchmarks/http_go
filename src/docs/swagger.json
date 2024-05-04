@@ -3,7 +3,6 @@
     "info": {
         "contact": {}
     },
-    "basePath": "/api/v1",
     "paths": {
         "/login": {
             "post": {
@@ -27,29 +26,6 @@
                     },
                     "400": {
                         "description": "Invalid request body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/ping": {
-            "get": {
-                "description": "do ping",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "example"
-                ],
-                "summary": "ping example",
-                "responses": {
-                    "200": {
-                        "description": "OK",
                         "schema": {
                             "type": "string"
                         }
