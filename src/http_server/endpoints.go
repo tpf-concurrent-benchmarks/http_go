@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-var db = make(map[string]string)
+var db_users = make(map[string]string)
+var db_poll = make(map[string]models.Poll)
 
 // @BasePath /api/v1
 
@@ -15,7 +16,7 @@ var db = make(map[string]string)
 // @Param  name query string true "name"
 func UserExists(c *gin.Context)  {
 	user := c.Request.URL.Query().Get("name")
-	value, ok := db[user]
+	value, ok := db_users[user]
 	if ok {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "value": value})
 	} else {
@@ -42,13 +43,13 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Check if username already exists
-	if _, exists := db[user.Username]; exists {
+	if _, exists := db_users[user.Username]; exists {
 		c.JSON(400, gin.H{"error": "Username already exists"})
 		return
 	}
 
 	// Add username to the database
-	db[user.Username] = user.HashedPassword
+	db_users[user.Username] = user.HashedPassword
 
 	c.JSON(200, gin.H{"message": "User added successfully"})
 }
@@ -65,7 +66,7 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	userPassword, ok := db[user.Username]
+	userPassword, ok := db_users[user.Username]
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
@@ -90,4 +91,45 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		"access_token": token,
 		"token_type":   "bearer",
 	})
+}
+
+func generatePollID() string {
+	//TODO: Implement this function
+	return "1"
+}
+
+// @Router /poll [post]
+// @Param token header models.Token true "Bearer token"
+// @Param poll body models.Poll true "Poll object"
+// @Success 200 {string} string "Poll created successfully"
+// @Failure 400 {string} string "Invalid request payload"
+func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
+	header := c.GetHeader("Authorization")
+	if header == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	
+	var token models.Token
+	if err := c.ShouldBindHeader(&token); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	_, err := jwtManager.DecodeJWTToken(token.AccessToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+		return
+	}
+
+	var poll models.Poll
+	ID := generatePollID()
+	if err := c.ShouldBindJSON(&poll); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	db_poll[ID] = poll
+
+	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
 }

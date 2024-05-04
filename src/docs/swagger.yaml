@@ -1,4 +1,13 @@
 definitions:
+  models.Poll:
+    properties:
+      options:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
   models.UserInDB:
     properties:
       hashed_password:
@@ -25,6 +34,30 @@ paths:
             type: string
         "400":
           description: Invalid request body
+          schema:
+            type: string
+  /poll:
+    post:
+      parameters:
+      - in: header
+        name: access_token
+        type: string
+      - in: header
+        name: token_type
+        type: string
+      - description: Poll object
+        in: body
+        name: poll
+        required: true
+        schema:
+          $ref: '#/definitions/models.Poll'
+      responses:
+        "200":
+          description: Poll created successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
           schema:
             type: string
   /users:

@@ -44,6 +44,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/poll": {
+            "post": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "access_token",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "name": "token_type",
+                        "in": "header"
+                    },
+                    {
+                        "description": "Poll object",
+                        "name": "poll",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Poll"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Poll created successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "post": {
                 "description": "Add a new user to the database",
@@ -97,6 +136,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.Poll": {
+            "type": "object",
+            "properties": {
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UserInDB": {
             "type": "object",
             "properties": {
