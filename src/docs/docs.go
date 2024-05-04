@@ -15,6 +15,44 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/login": {
+            "post": {
+                "parameters": [
+                    {
+                        "description": "username",
+                        "name": "username",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "access_token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/ping": {
             "get": {
                 "description": "do ping",
@@ -50,12 +88,12 @@ const docTemplate = `{
                 "summary": "Add a new user",
                 "parameters": [
                     {
-                        "description": "Username to add",
-                        "name": "username",
+                        "description": "Username and hashed password",
+                        "name": "userInDB",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.UserInDB"
                         }
                     }
                 ],
@@ -87,6 +125,19 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "models.UserInDB": {
+            "type": "object",
+            "properties": {
+                "hashed_password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
             }
         }
     }

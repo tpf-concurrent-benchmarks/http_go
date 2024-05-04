@@ -1,24 +1,14 @@
-package main
+package http_server
 
 import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gin-gonic/gin"
-	"./models"
-	"github.com/joho/godotenv"
 )
-
-func loadEnv() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-}
 
 type JWTManager struct {
 	SecretKey                string
@@ -27,10 +17,18 @@ type JWTManager struct {
 }
 
 func NewJWTManager() *JWTManager {
-	return &JWTManager{
-		SecretKey:                os.Getenv("SECRET_KEY"),
-		AccessTokenExpireMinutes: getEnvInt("ACCESS_TOKEN_EXPIRE_MINUTES", 30),
-		Algorithm:                jwt.SigningMethodHS256,
+	if os.Getenv("ALGORITHM") == "HS256" {
+		return &JWTManager{
+			SecretKey:                os.Getenv("SECRET_KEY"),
+			AccessTokenExpireMinutes: getEnvInt("ACCESS_TOKEN_EXPIRE_MINUTES", 30),
+			Algorithm:                jwt.SigningMethodHS256,
+		}
+	} else {
+		return &JWTManager{
+			SecretKey:                os.Getenv("SECRET_KEY"),
+			AccessTokenExpireMinutes: getEnvInt("ACCESS_TOKEN_EXPIRE_MINUTES", 30),
+			Algorithm:                jwt.SigningMethodHS512,
+		}
 	}
 }
 
@@ -45,7 +43,6 @@ func (jm *JWTManager) CreateJWTToken(data map[string]interface{}, expiresDelta t
 	return token.SignedString([]byte(jm.SecretKey))
 }
 
-// DecodeJWTToken decodes and verifies a JWT token, returning the claims if valid
 func (jm *JWTManager) DecodeJWTToken(tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jm.SecretKey), nil
@@ -57,21 +54,12 @@ func (jm *JWTManager) DecodeJWTToken(tokenStr string) (jwt.MapClaims, error) {
 	if !ok {
 		return nil, fmt.Errorf("invalid token claims")
 	}
+    if int64(claims["exp"].(float64)) < time.Now().Unix() {
+        return nil, fmt.Errorf("token has expired")
+    }
 	return claims, nil
 }
 
-// getEnvInt retrieves an integer environment variable or returns a default value
-func getEnvInt(key string, defaultValue int) int {
-	valStr := os.Getenv(key)
-	if valStr == "" {
-		return defaultValue
-	}
-	val, err := strconv.Atoi(valStr)
-	if err != nil {
-		return defaultValue
-	}
-	return val
-}
 func main() {
 	jwtManager := NewJWTManager()
 

@@ -6,9 +6,12 @@ import (
    ginSwagger "github.com/swaggo/gin-swagger"
    "net/http"
    docs "http_go/docs"
-   "fmt"
-   "github.com/golang-jwt/jwt/v5"
+//    "fmt"
+	jwt "http_go/http_server"
+	models "http_go/http_server/models"
+	"time"
 )
+
 // @BasePath /api/v1
 
 // PingExample godoc
@@ -41,36 +44,75 @@ func user_exists(c *gin.Context)  {
 // @Description Add a new user to the database
 // @Accept json
 // @Produce json
-// @Param username body string true "Username to add"
+// @Param userInDB body models.UserInDB true "Username and hashed password"
 // @Success 200 {string} string "User added successfully"
 // @Failure 400 {string} string "Invalid request payload"
 // @Router /users [post]
 func create_user(c *gin.Context) {
-	var username string
+	var user models.UserInDB
 
 	// Bind JSON request body to username variable
-	if err := c.ShouldBindJSON(&username); err != nil {
+	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
 	// Check if username already exists
-	if _, exists := db[username]; exists {
+	if _, exists := db[user.Username]; exists {
 		c.JSON(400, gin.H{"error": "Username already exists"})
 		return
 	}
 
 	// Add username to the database
-	db[username] = "true"
+	db[user.Username] = user.HashedPassword
 
 	c.JSON(200, gin.H{"message": "User added successfully"})
 }
+
+// @Router /login [post]
+// @Param  username body string true "username"
+// @Param  password body string true "password"
+// @Success 200 {string} string "access_token"
+// @Failure 400 {string} string "Invalid request body"
+func login(jwtManager *jwt.JWTManager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var credentials struct {
+			Username string `json:"username"`
+			// Add other fields as needed (e.g., password)
+		}
+		if err := c.ShouldBindJSON(&credentials); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		// Validate user credentials (e.g., authenticate against database)
+		// For demonstration, assuming authentication is successful
+		tokenData := map[string]interface{}{
+			"sub": credentials.Username,
+			// Add other claims as needed
+		}
+
+		token, err := jwtManager.CreateJWTToken(tokenData, time.Minute*time.Duration(jwtManager.AccessTokenExpireMinutes))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"access_token": token,
+			"token_type":   "bearer",
+		})
+	}
+}
+
 
 var db = make(map[string]string)
 
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
+	jwtManager := jwt.NewJWTManager()
+
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := r.Group("/api/v1")
@@ -79,6 +121,7 @@ func setupRouter() *gin.Engine {
 
 	
 	v1.POST("/users", create_user)
+	v1.POST("/login", login(jwtManager))
 	v1.GET("/users/:name", user_exists)
 
 	// Authorized group (uses gin.BasicAuth() middleware)

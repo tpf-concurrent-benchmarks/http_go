@@ -1,7 +1,39 @@
 basePath: /api/v1
+definitions:
+  models.UserInDB:
+    properties:
+      hashed_password:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /login:
+    post:
+      parameters:
+      - description: username
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      - description: password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: access_token
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
   /ping:
     get:
       consumes:
@@ -23,12 +55,12 @@ paths:
       - application/json
       description: Add a new user to the database
       parameters:
-      - description: Username to add
+      - description: Username and hashed password
         in: body
-        name: username
+        name: userInDB
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/models.UserInDB'
       produces:
       - application/json
       responses:
