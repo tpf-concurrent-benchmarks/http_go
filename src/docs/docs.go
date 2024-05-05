@@ -110,6 +110,24 @@ const docTemplate = `{
                 }
             }
         },
+        "/polls": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Polls object",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Polls not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "post": {
                 "description": "Add a new user to the database",

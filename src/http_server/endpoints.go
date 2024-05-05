@@ -144,3 +144,10 @@ func GetPoll(c *gin.Context) {
 
 	c.JSON(200, poll)
 }
+
+// @Router /polls [get]
+// @Success 200 {string} string "Polls object"
+// @Failure 404 {string} string "Polls not found"
+func GetPolls(c *gin.Context) {
+	c.JSON(200,gin.H{"polls": db_poll})
+}

@@ -24,6 +24,7 @@ func setupRouter() *gin.Engine {
 		server.CreatePoll(jwtManager, c)
 	})
 	v1.GET("/poll/:id", server.GetPoll)
+	v1.GET("/polls", server.GetPolls)
 	v1.GET("/users/:name", server.UserExists)
 
 	return r

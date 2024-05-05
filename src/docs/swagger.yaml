@@ -77,6 +77,17 @@ paths:
           description: Poll not found
           schema:
             type: string
+  /polls:
+    get:
+      responses:
+        "200":
+          description: Polls object
+          schema:
+            type: string
+        "404":
+          description: Polls not found
+          schema:
+            type: string
   /users:
     post:
       consumes:
