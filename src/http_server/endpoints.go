@@ -129,3 +129,18 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
 }
+
+// @Router /poll/{id} [get]
+// @Param id path string true "Poll ID"
+// @Success 200 {string} string "Poll object"
+// @Failure 404 {string} string "Poll not found"
+func GetPoll(c *gin.Context) {
+	ID := c.Param("id")
+	poll, ok := db_poll[ID]
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		return
+	}
+
+	c.JSON(200, poll)
+}

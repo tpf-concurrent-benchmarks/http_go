@@ -60,6 +60,23 @@ paths:
           description: Invalid request payload
           schema:
             type: string
+  /poll/{id}:
+    get:
+      parameters:
+      - description: Poll ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Poll object
+          schema:
+            type: string
+        "404":
+          description: Poll not found
+          schema:
+            type: string
   /users:
     post:
       consumes:
