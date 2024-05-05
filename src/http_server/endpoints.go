@@ -104,19 +104,15 @@ func generatePollID() string {
 // @Success 200 {string} string "Poll created successfully"
 // @Failure 400 {string} string "Invalid request payload"
 func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
-	header := c.GetHeader("Authorization")
-	if header == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
 	
-	var token models.Token
-	if err := c.ShouldBindHeader(&token); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+	access_token := c.Request.Header["Access_token"][0]
+	token_type := c.Request.Header["Token_type"][0]
+	if token_type != "bearer" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Un supported token type"})
 		return
 	}
 
-	_, err := jwtManager.DecodeJWTToken(token.AccessToken)
+	_, err := jwtManager.DecodeJWTToken(access_token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 		return

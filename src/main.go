@@ -20,7 +20,7 @@ func setupRouter() *gin.Engine {
 	v1.POST("/login", func(c *gin.Context) {
 		server.Login(jwtManager, c)
 	})
-	v1.POST("/polls", func(c *gin.Context) {
+	v1.POST("/poll", func(c *gin.Context) {
 		server.CreatePoll(jwtManager, c)
 	})
 	v1.GET("/users/:name", server.UserExists)
