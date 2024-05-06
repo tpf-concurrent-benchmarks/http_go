@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	docs "http_go/docs"
 	server "http_go/http_server"
+	"fmt"
 )
 
 func setupRouter() *gin.Engine {
@@ -31,6 +32,12 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+	server.LoadEnv()
+	postgres := server.StartDatabase()
+	fmt.Println(postgres)
+	defer server.CloseDatabase(postgres)
+	db := server.InitializeDatabase()
+	fmt.Println(db)
 	r := setupRouter()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
