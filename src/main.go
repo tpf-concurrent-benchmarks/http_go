@@ -7,6 +7,10 @@ import (
 	docs "http_go/docs"
 	server "http_go/http_server"
 	"fmt"
+	"github.com/fergusstrange/embedded-postgres"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func setupRouter() *gin.Engine {
@@ -31,9 +35,22 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
+func cleanup(postgres *embeddedpostgres.EmbeddedPostgres) {
+	server.CloseDatabase(postgres)
+    fmt.Println("cleanup")
+}
+
+
 func main() {
 	server.LoadEnv()
 	postgres := server.StartDatabase()
+	c := make(chan os.Signal)
+    signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+    go func() {
+        <-c
+        cleanup(postgres)
+        os.Exit(1)
+    }()
 	fmt.Println(postgres)
 	defer server.CloseDatabase(postgres)
 	db := server.InitializeDatabase()

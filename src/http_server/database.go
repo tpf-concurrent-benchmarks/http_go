@@ -6,7 +6,6 @@ import (
 	_ "github.com/lib/pq"
 	"os"
 	"github.com/fergusstrange/embedded-postgres"
-
 )
 
 func getConfig() (string, string, string, string, string) {
@@ -44,7 +43,6 @@ func StartDatabase() *embeddedpostgres.EmbeddedPostgres {
 	if err != nil {
 		panic(err)
 	}
-	// fmt.Println("started database")
 	return postgres
 }
 
