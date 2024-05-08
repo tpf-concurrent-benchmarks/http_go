@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"database/sql"
 )
 
 func setupRouter(db *sql.DB) *gin.Engine {
@@ -53,7 +54,7 @@ func main() {
     }()
 	defer server.CloseDatabase(postgres)
 	db := server.InitializeDatabase()
-	r := setupRouter()
+	r := setupRouter(db)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

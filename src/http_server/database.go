@@ -7,6 +7,7 @@ import (
 	"os"
 	"github.com/fergusstrange/embedded-postgres"
 	"github.com/google/uuid"
+	"github.com/gin-gonic/gin"
 )
 
 func getConfig() (string, string, string, string, string) {
@@ -81,9 +82,20 @@ func createUserTable(db *sql.DB) error {
 	return err
 }
 
-func insertUser(c *gin.Context,  id UUID, username string, password string) error {
+func insertUser(c *gin.Context,  id uuid.UUID, username string, password string) error {
+	//TODO: check if user already exists
 	db := GetDB(c)
 	sqlStatement := `INSERT INTO users (id, username, password) VALUES ($1, $2, $3)`
 	_, err := db.Exec(sqlStatement, id.String(), username, password)
 	return err
+}
+
+func getUser(c *gin.Context, username string) (string, error) {
+	db := GetDB(c)
+	sqlStatement := `SELECT password FROM users WHERE username=$1`
+	var password string
+	if err := db.QueryRow(sqlStatement, username).Scan(&password); err != nil {
+		return "", err
+	}
+	return password, nil
 }

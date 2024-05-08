@@ -6,6 +6,7 @@ import (
 	models "http_go/http_server/models"
 	"time"
 	"github.com/google/uuid"
+	"fmt"
 )
 
 var db_users = make(map[string]string)
@@ -50,7 +51,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Add username to the database
-	insertUser(c, uuid.New(), user.Username, user.HashedPassword)
+	err := insertUser(c, uuid.New(), user.Username, user.HashedPassword)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to add user"})
 		return
@@ -71,11 +72,13 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	userPassword, ok := db_users[user.Username]
-	if !ok {
+	userPassword, err := getUser(c, user.Username)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
+	fmt.Println(userPassword)
+	fmt.Println(err)
 
 	if userPassword != user.HashedPassword {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
