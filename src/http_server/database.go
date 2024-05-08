@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"os"
 	"github.com/fergusstrange/embedded-postgres"
+	"github.com/google/uuid"
 )
 
 func getConfig() (string, string, string, string, string) {
@@ -34,6 +35,10 @@ func InitializeDatabase() *sql.DB {
 		panic(err)
 	}
 	fmt.Println("Connected to PostgreSQL")
+	err = createUserTable(db)
+	if err != nil {
+		panic(err)
+	}
 	return db
 }
 
@@ -52,4 +57,33 @@ func CloseDatabase(postgres *embeddedpostgres.EmbeddedPostgres) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func DatabaseMiddleware(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("db", db) // Attach db to context
+		c.Next()
+	}
+}
+
+func GetDB(c *gin.Context) *sql.DB {
+	return c.MustGet("db").(*sql.DB)
+}
+
+func createUserTable(db *sql.DB) error {
+	sqlStatement := `
+	CREATE TABLE users (
+		id TEXT PRIMARY KEY,
+		username TEXT NOT NULL,
+		password TEXT NOT NULL
+	);`
+	_, err := db.Exec(sqlStatement)
+	return err
+}
+
+func insertUser(c *gin.Context,  id UUID, username string, password string) error {
+	db := GetDB(c)
+	sqlStatement := `INSERT INTO users (id, username, password) VALUES ($1, $2, $3)`
+	_, err := db.Exec(sqlStatement, id.String(), username, password)
+	return err
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	models "http_go/http_server/models"
 	"time"
+	"github.com/google/uuid"
 )
 
 var db_users = make(map[string]string)
@@ -49,7 +50,11 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Add username to the database
-	db_users[user.Username] = user.HashedPassword
+	insertUser(c, uuid.New(), user.Username, user.HashedPassword)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to add user"})
+		return
+	}
 
 	c.JSON(200, gin.H{"message": "User added successfully"})
 }

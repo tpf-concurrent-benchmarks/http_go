@@ -13,13 +13,13 @@ import (
 	"syscall"
 )
 
-func setupRouter() *gin.Engine {
+func setupRouter(db *sql.DB) *gin.Engine {
 	jwtManager := server.NewJWTManager()
 
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := r.Group("/api/v1")
-
+	v1.Use(server.DatabaseMiddleware(db))
 	
 	v1.POST("/users", server.CreateUser)
 	v1.POST("/login", func(c *gin.Context) {
@@ -51,10 +51,8 @@ func main() {
         cleanup(postgres)
         os.Exit(1)
     }()
-	fmt.Println(postgres)
 	defer server.CloseDatabase(postgres)
 	db := server.InitializeDatabase()
-	fmt.Println(db)
 	r := setupRouter()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
