@@ -107,18 +107,8 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 // @Failure 400 {string} string "Invalid request payload"
 func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 	
-	access_token := c.Request.Header["Access_token"][0]
-	token_type := c.Request.Header["Token_type"][0]
-	if token_type != "bearer" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Un supported token type"})
-		return
-	}
-
-	claims, err := jwtManager.DecodeJWTToken(access_token)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
-		return
-	}
+	claims, err := processToken(jwtManager, c)
+	if err != nil { return }
 	user_id := claims["id"].(string)
 	var poll models.Poll
 	if err := c.ShouldBindJSON(&poll); err != nil {
@@ -151,4 +141,32 @@ func GetPoll(c *gin.Context) {
 // @Failure 404 {string} string "Polls not found"
 func GetPolls(c *gin.Context) {
 	c.JSON(200,gin.H{"polls": db_poll})
+}
+
+// @Router /poll/{id}/vote [post]
+// @Param token header models.Token true "Bearer token"
+// @Param vote body models.Vote true "Vote object"
+// @Success 200 {string} string "Voted successfully"
+// @Failure 400 {string} string "Invalid request payload"
+func Vote(jwtManager *JWTManager, c *gin.Context) {
+	var vote models.Vote
+	if err := c.ShouldBindJSON(&vote); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	claims, err := processToken(jwtManager, c)
+	if err != nil { return }
+	if claims["sub"].(string) != vote.Username {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	err = insertVote(c, vote, claims["id"].(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to vote"})
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "Voted successfully"})
 }

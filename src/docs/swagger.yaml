@@ -15,6 +15,15 @@ definitions:
       username:
         type: string
     type: object
+  models.Vote:
+    properties:
+      option:
+        type: integer
+      poll_id:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -75,6 +84,30 @@ paths:
             type: string
         "404":
           description: Poll not found
+          schema:
+            type: string
+  /poll/{id}/vote:
+    post:
+      parameters:
+      - in: header
+        name: access_token
+        type: string
+      - in: header
+        name: token_type
+        type: string
+      - description: Vote object
+        in: body
+        name: vote
+        required: true
+        schema:
+          $ref: '#/definitions/models.Vote'
+      responses:
+        "200":
+          description: Voted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
           schema:
             type: string
   /polls:

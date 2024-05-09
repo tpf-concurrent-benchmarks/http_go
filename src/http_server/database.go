@@ -221,3 +221,10 @@ func getPoll(c *gin.Context, pollID string) (models.PollWithVotes, error) {
 	}
 	return models.PollWithVotes{Title: poll.Title, Options: options}, nil
 }
+
+func insertVote(c *gin.Context, vote models.Vote, userID string) error {
+	db := GetDB(c)
+	sqlStatement := `INSERT INTO votes (poll_id, user_id, option_num) VALUES ($1, $2, $3)`
+	_, err := db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
+	return err
+}

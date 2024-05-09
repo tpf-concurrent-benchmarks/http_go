@@ -31,6 +31,9 @@ func setupRouter(db *sql.DB) *gin.Engine {
 	})
 	v1.GET("/poll/:id", server.GetPoll)
 	v1.GET("/polls", server.GetPolls)
+	v1.POST("poll/:id/vote", func(c *gin.Context) {
+		server.Vote(jwtManager, c)
+	})
 	v1.GET("/users/:name", server.UserExists)
 
 	return r

@@ -110,6 +110,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/poll/{id}/vote": {
+            "post": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "access_token",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "name": "token_type",
+                        "in": "header"
+                    },
+                    {
+                        "description": "Vote object",
+                        "name": "vote",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Vote"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Voted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/polls": {
             "get": {
                 "responses": {
@@ -199,6 +238,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "hashed_password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Vote": {
+            "type": "object",
+            "properties": {
+                "option": {
+                    "type": "integer"
+                },
+                "poll_id": {
                     "type": "string"
                 },
                 "username": {
