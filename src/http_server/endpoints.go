@@ -72,21 +72,20 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	userPassword, err := getUser(c, user.Username)
+	userData, err := getUser(c, user.Username)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
-	fmt.Println(userPassword)
-	fmt.Println(err)
 
-	if userPassword != user.HashedPassword {
+	if userData.HashedPassword != user.HashedPassword {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
 	tokenData := map[string]interface{}{
 		"sub": user.Username,
+		"id":  userData.ID,
 	}
 
 	token, err := jwtManager.CreateJWTToken(tokenData, time.Minute*time.Duration(jwtManager.AccessTokenExpireMinutes))
@@ -99,11 +98,6 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		"access_token": token,
 		"token_type":   "bearer",
 	})
-}
-
-func generatePollID() string {
-	//TODO: Implement this function
-	return "1"
 }
 
 // @Router /poll [post]
@@ -120,20 +114,19 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	_, err := jwtManager.DecodeJWTToken(access_token)
+	claims, err := jwtManager.DecodeJWTToken(access_token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 		return
 	}
-
+	user_id := claims["id"].(string)
 	var poll models.Poll
-	ID := generatePollID()
 	if err := c.ShouldBindJSON(&poll); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	db_poll[ID] = poll
+	ID, err := insertPoll(c, user_id, poll)
 
 	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
 }
@@ -144,8 +137,8 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 // @Failure 404 {string} string "Poll not found"
 func GetPoll(c *gin.Context) {
 	ID := c.Param("id")
-	poll, ok := db_poll[ID]
-	if !ok {
+	poll, err := getPoll(c, ID)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
 		return
 	}
