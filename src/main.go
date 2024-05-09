@@ -12,15 +12,16 @@ import (
 	"os/signal"
 	"syscall"
 	"database/sql"
+	db "http_go/http_server/database"
 )
 
-func setupRouter(db *sql.DB) *gin.Engine {
+func setupRouter(db_controller *sql.DB) *gin.Engine {
 	jwtManager := server.NewJWTManager()
 
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := r.Group("/api/v1")
-	v1.Use(server.DatabaseMiddleware(db))
+	v1.Use(db.DatabaseMiddleware(db_controller))
 	
 	v1.POST("/users", server.CreateUser)
 	v1.POST("/login", func(c *gin.Context) {
@@ -40,14 +41,14 @@ func setupRouter(db *sql.DB) *gin.Engine {
 }
 
 func cleanup(postgres *embeddedpostgres.EmbeddedPostgres) {
-	server.CloseDatabase(postgres)
+	db.CloseDatabase(postgres)
     fmt.Println("cleanup")
 }
 
 
 func main() {
 	server.LoadEnv()
-	postgres := server.StartDatabase()
+	postgres := db.StartDatabase()
 	c := make(chan os.Signal)
     signal.Notify(c, os.Interrupt, syscall.SIGTERM)
     go func() {
@@ -55,9 +56,9 @@ func main() {
         cleanup(postgres)
         os.Exit(1)
     }()
-	defer server.CloseDatabase(postgres)
-	db := server.InitializeDatabase()
-	r := setupRouter(db)
+	defer db.CloseDatabase(postgres)
+	db_controller := db.InitializeDatabase()
+	r := setupRouter(db_controller)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 

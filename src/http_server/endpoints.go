@@ -6,6 +6,7 @@ import (
 	models "http_go/http_server/models"
 	"time"
 	"fmt"
+	db "http_go/http_server/database"
 )
 
 var db_users = make(map[string]string)
@@ -44,13 +45,13 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Check if username already exists
-	if _, exists := db_users[user.Username]; exists {
-		c.JSON(400, gin.H{"error": "Username already exists"})
-		return
-	}
+	// if _, exists := db_users[user.Username]; exists {
+	// 	c.JSON(400, gin.H{"error": "Username already exists"})
+	// 	return
+	// }
 
 	// Add username to the database
-	err := insertUser(c, user.Username, user.HashedPassword)
+	err := db.InsertUser(c, user.Username, user.HashedPassword)
 	fmt.Println(err)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to add user"})
@@ -72,7 +73,7 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	userData, err := getUser(c, user.Username)
+	userData, err := db.GetUser(c, user.Username)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
@@ -116,7 +117,7 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	ID, err := insertPoll(c, user_id, poll)
+	ID, err := db.InsertPoll(c, user_id, poll)
 
 	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
 }
@@ -127,7 +128,7 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 // @Failure 404 {string} string "Poll not found"
 func GetPoll(c *gin.Context) {
 	ID := c.Param("id")
-	poll, err := getPoll(c, ID)
+	poll, err := db.GetPoll(c, ID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
 		return
@@ -162,7 +163,7 @@ func Vote(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	err = insertVote(c, vote, claims["id"].(string))
+	err = db.InsertVote(c, vote, claims["id"].(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to vote"})
 		return
