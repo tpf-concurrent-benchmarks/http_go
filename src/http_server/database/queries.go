@@ -86,3 +86,36 @@ func InsertVote(c *gin.Context, vote models.Vote, userID string) error {
 	_, err := db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
 	return err
 }
+
+func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, error) {
+	db := getDB(c)
+	sqlStatement := `SELECT poll_topic 
+					 FROM polls 
+					 WHERE poll_id=$1`
+	var poll models.Poll
+	err := db.QueryRow(sqlStatement, pollID).Scan(&poll.Title)
+	if err != nil {
+		return models.PollWithVotes{}, err
+	}
+	sqlStatement = `SELECT option_text, COUNT(option_num) 
+					FROM poll_options LEFT JOIN votes 
+						ON poll_options.poll_id=votes.poll_id 
+						AND poll_options.option_num=votes.option_num 
+					WHERE poll_options.poll_id=$1 
+					GROUP BY option_text`
+	rows, err := db.Query(sqlStatement, pollID)
+	if err != nil {
+		return models.PollWithVotes{}, err
+	}
+	defer rows.Close()
+	var options []models.Option
+	for rows.Next() {
+		var option models.Option
+		err = rows.Scan(&option.Name, &option.Votes)
+		if err != nil {
+			continue
+		}
+		options = append(options, option)
+	}
+	return models.PollWithVotes{Title: poll.Title, Options: options}, nil
+}

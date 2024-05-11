@@ -128,9 +128,9 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 // @Failure 404 {string} string "Poll not found"
 func GetPoll(c *gin.Context) {
 	ID := c.Param("id")
-	poll, err := db.GetPoll(c, ID)
+	poll, err := db.GetPollWithVotes(c, ID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting poll", "message": err})
 		return
 	}
 
