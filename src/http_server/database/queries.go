@@ -214,3 +214,43 @@ func printTableContents(db *sql.DB, tableName string) error {
 
 	return nil
 }
+
+func GetPollCreator(c *gin.Context, pollID string) (string, error) {
+	db := getDB(c)
+	sqlStatement := `SELECT creator_id FROM polls WHERE poll_id=$1`
+	var creatorID string
+	err := db.QueryRow(sqlStatement, pollID).Scan(&creatorID)
+	return creatorID, err
+}
+
+func DeletePoll(c *gin.Context, pollID string) error {
+	db := getDB(c)
+	printTableContents(db, "polls")
+	printTableContents(db, "poll_options")
+	printTableContents(db, "votes")
+	fmt.Println("Deleting poll with ID:", pollID)
+	sqlStatement := `DELETE FROM polls WHERE poll_id = $1`
+	_, err := db.Exec(sqlStatement, pollID)
+	combinedErr := ""
+	if err != nil {
+		combinedErr += "delete error in polls: " + err.Error() + "\n"
+
+	}
+	sqlStatement = `DELETE FROM poll_options WHERE poll_id = $1`
+	_, err = db.Exec(sqlStatement, pollID)
+	if err != nil {
+		combinedErr += "delete error in poll_options: " + err.Error() + "\n"
+	}
+	sqlStatement = `DELETE FROM votes WHERE poll_id = $1`
+	_, err = db.Exec(sqlStatement, pollID)
+	if err != nil {
+		combinedErr += "delete error in votes: " + err.Error() + "\n"
+	}
+	if combinedErr != "" {
+		return fmt.Errorf(combinedErr)
+	}
+	printTableContents(db, "polls")
+	printTableContents(db, "poll_options")
+	printTableContents(db, "votes")
+	return nil
+}

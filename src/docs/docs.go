@@ -96,7 +96,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Poll object",
+                        "description": "PollWithVotes object",
                         "schema": {
                             "type": "string"
                         }
@@ -160,6 +160,43 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Polls not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/polls/{id}": {
+            "delete": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "access_token",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "name": "token_type",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Poll ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Poll deleted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Poll not found",
                         "schema": {
                             "type": "string"
                         }

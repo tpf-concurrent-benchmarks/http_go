@@ -79,7 +79,7 @@ paths:
         type: string
       responses:
         "200":
-          description: Poll object
+          description: PollWithVotes object
           schema:
             type: string
         "404":
@@ -119,6 +119,29 @@ paths:
             type: string
         "404":
           description: Polls not found
+          schema:
+            type: string
+  /polls/{id}:
+    delete:
+      parameters:
+      - in: header
+        name: access_token
+        type: string
+      - in: header
+        name: token_type
+        type: string
+      - description: Poll ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Poll deleted successfully
+          schema:
+            type: string
+        "404":
+          description: Poll not found
           schema:
             type: string
   /users:

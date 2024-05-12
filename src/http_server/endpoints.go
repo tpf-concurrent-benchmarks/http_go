@@ -176,3 +176,31 @@ func Vote(jwtManager *JWTManager, c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": "Voted successfully"})
 }
+
+// @Router /polls/{id} [delete]
+// @Param token header models.Token true "Bearer token"
+// @Param id path string true "Poll ID"
+// @Success 200 {string} string "Poll deleted successfully"
+// @Failure 404 {string} string "Poll not found"
+func DeletePoll(jwtManager *JWTManager, c *gin.Context) {
+	claims, err := processToken(jwtManager, c)
+	if err != nil { return }
+	user_id := claims["id"].(string)
+
+	poll_id := c.Param("id")
+	creator_id, err := db.GetPollCreator(c, poll_id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "error getting poll", "message": err.Error()})
+		return
+	}
+	if creator_id != user_id {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized, user not recognized as creator of poll"})
+		return
+	} 
+	err = db.DeletePoll(c, poll_id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Error deleting poll", "message": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "Poll deleted successfully"})
+}
