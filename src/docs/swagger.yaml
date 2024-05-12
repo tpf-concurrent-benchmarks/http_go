@@ -168,13 +168,4 @@ paths:
           schema:
             type: string
       summary: Add a new user
-  /users/:name:
-    get:
-      parameters:
-      - description: name
-        in: query
-        name: name
-        required: true
-        type: string
-      responses: {}
 swagger: "2.0"

@@ -240,20 +240,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/:name": {
-            "get": {
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
         }
     },
     "definitions": {

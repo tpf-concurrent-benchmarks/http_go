@@ -38,7 +38,6 @@ func setupRouter(db_controller *sql.DB) *gin.Engine {
 	v1.DELETE("/polls/:id", func(c *gin.Context) {
 		server.DeletePoll(jwtManager, c)
 	})
-	v1.GET("/users/:name", server.UserExists)
 
 	return r
 }

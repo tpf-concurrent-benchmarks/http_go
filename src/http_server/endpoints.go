@@ -8,22 +8,7 @@ import (
 	db "http_go/http_server/database"
 )
 
-var db_users = make(map[string]string)
-var db_poll = make(map[string]models.Poll)
-
 // @BasePath /api/v1
-
-// @Router /users/:name [get]
-// @Param  name query string true "name"
-func UserExists(c *gin.Context)  {
-	user := c.Request.URL.Query().Get("name")
-	value, ok := db_users[user]
-	if ok {
-		c.JSON(http.StatusOK, gin.H{"status": "ok", "value": value})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"status": "ok", "value": "not found"})
-	}
-}
 
 // addUser adds a username to the database
 // @Summary Add a new user
