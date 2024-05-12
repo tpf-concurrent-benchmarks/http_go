@@ -58,8 +58,9 @@ func InsertPoll(c *gin.Context, creatorID string, poll models.Poll) (string, err
 
 func InsertVote(c *gin.Context, vote models.Vote, userID string) error {
 	db := getDB(c)
-	//check poll exists
-	sqlStatement := `SELECT COUNT(*) FROM polls WHERE poll_id=$1`
+
+	// Check if poll exists
+	sqlStatement := `SELECT COUNT(*) FROM polls WHERE poll_id = $1`
 	var count int
 	err := db.QueryRow(sqlStatement, vote.PollID).Scan(&count)
 	if err != nil {
@@ -68,13 +69,38 @@ func InsertVote(c *gin.Context, vote models.Vote, userID string) error {
 	if count == 0 {
 		return fmt.Errorf("poll does not exist")
 	}
-	//TODO: check if this vote exists
-	sqlStatement = `INSERT INTO votes (poll_id, user_id, option_num)
-					VALUES ($1, $2, $3)
-					ON CONFLICT (poll_id, user_id)  -- Specify the unique constraint columns
-					DO UPDATE SET option_num = EXCLUDED.option_num;  -- Update the existing row with the new values`
-	_, err = db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
-	return err
+
+	// Check if the vote already exists
+	var existingOptionNum int
+	sqlStatement = `SELECT option_num FROM votes WHERE poll_id = $1 AND user_id = $2`
+	err = db.QueryRow(sqlStatement, vote.PollID, userID).Scan(&existingOptionNum)
+
+	switch {
+	case err == sql.ErrNoRows:
+		// Vote does not exist, insert a new row
+		sqlStatement = `INSERT INTO votes (poll_id, user_id, option_num)
+						VALUES ($1, $2, $3)`
+		_, err = db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
+		return err
+
+	case err != nil:
+		// Other error occurred
+		return err
+
+	default:
+		// Vote exists, check the option_num
+		if existingOptionNum != vote.Option {
+			// Option number is different, update the option_num
+			sqlStatement = `UPDATE votes SET option_num = $1 WHERE poll_id = $2 AND user_id = $3`
+			_, err = db.Exec(sqlStatement, vote.Option, vote.PollID, userID)
+			return err
+		} else {
+			// Option number is the same, delete the existing vote
+			sqlStatement = `DELETE FROM votes WHERE poll_id = $1 AND user_id = $2`
+			_, err = db.Exec(sqlStatement, vote.PollID, userID)
+			return err
+		}
+	}
 }
 
 func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, error) {
@@ -93,8 +119,8 @@ func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, erro
 						LEFT JOIN votes v ON po.poll_id = v.poll_id 
 						AND po.option_num = v.option_num
 					WHERE po.poll_id = $1
-					GROUP BY po.option_text
-					SORT BY v.option_num ASC`
+					GROUP BY po.option_text, po.option_num
+					ORDER BY po.option_num ASC` //this may cause a problem if two options have the same text
 	rows, err := db.Query(sqlStatement, pollID)
 	if err != nil {
 		return models.PollWithVotes{}, err

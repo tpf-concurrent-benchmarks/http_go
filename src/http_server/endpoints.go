@@ -146,7 +146,7 @@ func GetPolls(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, {"polls": polls})
+	c.JSON(200, gin.H{"polls": polls})
 }
 
 // @Router /poll/{id}/vote [post]
