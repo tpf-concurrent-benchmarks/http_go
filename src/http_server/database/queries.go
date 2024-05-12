@@ -84,8 +84,19 @@ func GetPoll(c *gin.Context, pollID string) (models.PollWithVotes, error) {
 
 func InsertVote(c *gin.Context, vote models.Vote, userID string) error {
 	db := getDB(c)
-	sqlStatement := `INSERT INTO votes (poll_id, user_id, option_num) VALUES ($1, $2, $3)`
-	_, err := db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
+	//check poll exists
+	sqlStatement := `SELECT COUNT(*) FROM polls WHERE poll_id=$1`
+	var count int
+	err := db.QueryRow(sqlStatement, vote.PollID).Scan(&count)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("poll does not exist")
+	}
+	//TODO: check if this vote exists
+	sqlStatement = `INSERT INTO votes (poll_id, user_id, option_num) VALUES ($1, $2, $3)`
+	_, err = db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
 	return err
 }
 
@@ -99,12 +110,13 @@ func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, erro
 	if err != nil {
 		return models.PollWithVotes{}, err
 	}
-	sqlStatement = `SELECT option_text, COUNT(*) 
-					FROM poll_options LEFT JOIN votes 
-						ON poll_options.poll_id=votes.poll_id 
-						AND poll_options.option_num=votes.option_num 
-					WHERE poll_options.poll_id=$1 
-					GROUP BY option_text`
+	printTableContents(db, "votes")
+	sqlStatement = `SELECT po.option_text, COUNT(v.poll_id) AS vote_count
+					FROM poll_options po
+						LEFT JOIN votes v ON po.poll_id = v.poll_id 
+						AND po.option_num = v.option_num
+					WHERE po.poll_id = $1
+					GROUP BY po.option_text`
 	rows, err := db.Query(sqlStatement, pollID)
 	if err != nil {
 		return models.PollWithVotes{}, err

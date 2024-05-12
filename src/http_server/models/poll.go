@@ -12,7 +12,7 @@ type PollWithVotes struct {
 
 type PollInDB struct {
 	PollWithVotes
-	ID int `json:"id"`
+	ID string `json:"id"`
 }
 
 type Poll struct {
@@ -22,7 +22,7 @@ type Poll struct {
 
 type PollGet struct {
 	Poll
-	ID int `json:"id"`
+	ID string `json:"id"`
 }
 
 type PollMeta struct {

@@ -130,7 +130,7 @@ func GetPoll(c *gin.Context) {
 	ID := c.Param("id")
 	poll, err := db.GetPollWithVotes(c, ID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting poll", "message": err})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting poll", "message": err.Error()})
 		return
 	}
 
@@ -143,7 +143,7 @@ func GetPoll(c *gin.Context) {
 func GetPolls(c *gin.Context) {
 	polls, err := db.GetPolls(c)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting polls", "message": err})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting polls", "message": err.Error()})
 		return
 	}
 
@@ -171,7 +171,7 @@ func Vote(jwtManager *JWTManager, c *gin.Context) {
 
 	err = db.InsertVote(c, vote, claims["id"].(string))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to vote"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to vote", "message": err.Error()})
 		return
 	}
 
