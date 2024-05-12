@@ -116,7 +116,7 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-
+	fmt.Println(poll)
 	ID, err := db.InsertPoll(c, user_id, poll)
 
 	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
@@ -124,7 +124,7 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 
 // @Router /poll/{id} [get]
 // @Param id path string true "Poll ID"
-// @Success 200 {string} string "Poll object"
+// @Success 200 {string} string "PollWithVotes object"
 // @Failure 404 {string} string "Poll not found"
 func GetPoll(c *gin.Context) {
 	ID := c.Param("id")
@@ -141,7 +141,13 @@ func GetPoll(c *gin.Context) {
 // @Success 200 {string} string "Polls object"
 // @Failure 404 {string} string "Polls not found"
 func GetPolls(c *gin.Context) {
-	c.JSON(200,gin.H{"polls": db_poll})
+	polls, err := db.GetPolls(c)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting polls", "message": err})
+		return
+	}
+
+	c.JSON(200, polls)
 }
 
 // @Router /poll/{id}/vote [post]

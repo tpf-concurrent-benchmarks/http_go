@@ -24,3 +24,8 @@ type PollGet struct {
 	Poll
 	ID int `json:"id"`
 }
+
+type PollMeta struct {
+	ID string `json:"id"`
+	Title string `json:"title"`
+}
