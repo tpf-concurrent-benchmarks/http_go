@@ -113,7 +113,6 @@ func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, erro
 	if err != nil {
 		return models.PollWithVotes{}, err
 	}
-	printTableContents(db, "votes")
 	sqlStatement = `SELECT po.option_text, COUNT(v.poll_id) AS vote_count
 					FROM poll_options po
 						LEFT JOIN votes v ON po.poll_id = v.poll_id 
@@ -141,17 +140,14 @@ func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, erro
 
 func GetPolls(c *gin.Context) ([]models.PollMeta, error) {
 	db := getDB(c)
-	printTableContents(db, "polls")
 	sqlStatement := `SELECT poll_id, poll_topic FROM polls`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(rows)
 	defer rows.Close()
 	var polls []models.PollMeta
 	for rows.Next() {
-		fmt.Println("in loop")
 		var poll models.PollMeta
 		err = rows.Scan(&poll.ID, &poll.Title)
 		if err != nil {
@@ -159,60 +155,7 @@ func GetPolls(c *gin.Context) ([]models.PollMeta, error) {
 		}
 		polls = append(polls, poll)
 	}
-	fmt.Println(polls)
 	return polls, nil
-}
-
-func printTableContents(db *sql.DB, tableName string) error {
-	// Construct the SQL query to select all rows from the specified table
-	query := fmt.Sprintf("SELECT * FROM %s", tableName)
-
-	// Execute the SQL query using db.Query
-	rows, err := db.Query(query)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	// Get column names from the result set
-	columnNames, err := rows.Columns()
-	if err != nil {
-		return err
-	}
-
-	// Print column names
-	fmt.Println("Table:", tableName)
-	fmt.Println("Columns:", columnNames)
-
-	// Iterate over the rows returned by the query
-	for rows.Next() {
-		// Slice to hold column values for this row
-		columnValues := make([]interface{}, len(columnNames))
-		columnPointers := make([]interface{}, len(columnNames))
-
-		// Map column values to column pointers for Scan method
-		for i := range columnValues {
-			columnPointers[i] = &columnValues[i]
-		}
-
-		// Scan row data into columnValues slice
-		if err := rows.Scan(columnPointers...); err != nil {
-			return err
-		}
-
-		// Print row data
-		for i, value := range columnValues {
-			fmt.Printf("%s: %v\t", columnNames[i], value)
-		}
-		fmt.Println() // Newline after each row
-	}
-
-	// Check for errors during iteration
-	if err := rows.Err(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func GetPollCreator(c *gin.Context, pollID string) (string, error) {
@@ -225,10 +168,6 @@ func GetPollCreator(c *gin.Context, pollID string) (string, error) {
 
 func DeletePoll(c *gin.Context, pollID string) error {
 	db := getDB(c)
-	printTableContents(db, "polls")
-	printTableContents(db, "poll_options")
-	printTableContents(db, "votes")
-	fmt.Println("Deleting poll with ID:", pollID)
 	sqlStatement := `DELETE FROM polls WHERE poll_id = $1`
 	_, err := db.Exec(sqlStatement, pollID)
 	combinedErr := ""
@@ -249,8 +188,5 @@ func DeletePoll(c *gin.Context, pollID string) error {
 	if combinedErr != "" {
 		return fmt.Errorf(combinedErr)
 	}
-	printTableContents(db, "polls")
-	printTableContents(db, "poll_options")
-	printTableContents(db, "votes")
 	return nil
 }

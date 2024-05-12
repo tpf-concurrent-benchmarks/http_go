@@ -45,14 +45,9 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// Check if username already exists
-	// if _, exists := db_users[user.Username]; exists {
-	// 	c.JSON(400, gin.H{"error": "Username already exists"})
-	// 	return
-	// }
 
 	// Add username to the database
 	err := db.InsertUser(c, user.Username, user.HashedPassword)
-	fmt.Println(err)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to add user"})
 		return
@@ -116,7 +111,6 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-	fmt.Println(poll)
 	ID, err := db.InsertPoll(c, user_id, poll)
 
 	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
