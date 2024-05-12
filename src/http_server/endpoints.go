@@ -5,7 +5,6 @@ import (
 	"net/http"
 	models "http_go/http_server/models"
 	"time"
-	"fmt"
 	db "http_go/http_server/database"
 )
 
