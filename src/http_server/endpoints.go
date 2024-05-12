@@ -133,7 +133,6 @@ func GetPoll(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting poll", "message": err.Error()})
 		return
 	}
-
 	c.JSON(200, poll)
 }
 
@@ -147,7 +146,7 @@ func GetPolls(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, polls)
+	c.JSON(200, {"polls": polls})
 }
 
 // @Router /poll/{id}/vote [post]

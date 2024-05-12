@@ -56,32 +56,6 @@ func InsertPoll(c *gin.Context, creatorID string, poll models.Poll) (string, err
 	return pollID, err
 }
 
-func GetPoll(c *gin.Context, pollID string) (models.PollWithVotes, error) {
-	db := getDB(c)
-	sqlStatement := `SELECT poll_topic FROM polls WHERE poll_id=$1`
-	var poll models.Poll
-	err := db.QueryRow(sqlStatement, pollID).Scan(&poll.Title)
-	if err != nil {
-		return models.PollWithVotes{}, err
-	}
-	sqlStatement = `SELECT option_text FROM poll_options WHERE poll_id=$1`
-	rows, err := db.Query(sqlStatement, pollID)
-	if err != nil {
-		return models.PollWithVotes{}, err
-	}
-	defer rows.Close()
-	var options []models.Option
-	for rows.Next() {
-		var option models.Option
-		err = rows.Scan(&option.Name)
-		if err != nil {
-			return models.PollWithVotes{}, err
-		}
-		options = append(options, option)
-	}
-	return models.PollWithVotes{Title: poll.Title, Options: options}, nil
-}
-
 func InsertVote(c *gin.Context, vote models.Vote, userID string) error {
 	db := getDB(c)
 	//check poll exists
@@ -95,7 +69,10 @@ func InsertVote(c *gin.Context, vote models.Vote, userID string) error {
 		return fmt.Errorf("poll does not exist")
 	}
 	//TODO: check if this vote exists
-	sqlStatement = `INSERT INTO votes (poll_id, user_id, option_num) VALUES ($1, $2, $3)`
+	sqlStatement = `INSERT INTO votes (poll_id, user_id, option_num)
+					VALUES ($1, $2, $3)
+					ON CONFLICT (poll_id, user_id)  -- Specify the unique constraint columns
+					DO UPDATE SET option_num = EXCLUDED.option_num;  -- Update the existing row with the new values`
 	_, err = db.Exec(sqlStatement, vote.PollID, userID, vote.Option)
 	return err
 }
@@ -116,7 +93,8 @@ func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, erro
 						LEFT JOIN votes v ON po.poll_id = v.poll_id 
 						AND po.option_num = v.option_num
 					WHERE po.poll_id = $1
-					GROUP BY po.option_text`
+					GROUP BY po.option_text
+					SORT BY v.option_num ASC`
 	rows, err := db.Query(sqlStatement, pollID)
 	if err != nil {
 		return models.PollWithVotes{}, err
@@ -125,6 +103,7 @@ func GetPollWithVotes(c *gin.Context, pollID string) (models.PollWithVotes, erro
 	var options []models.Option
 	for rows.Next() {
 		var option models.Option
+		option.Votes = 0
 		err = rows.Scan(&option.Name, &option.Votes)
 		if err != nil {
 			continue
