@@ -6,6 +6,8 @@ import (
 	models "http_go/http_server/models"
 	"time"
 	db "http_go/http_server/database"
+	"fmt"
+	"encoding/json"
 )
 
 // @BasePath /api/v1
@@ -114,7 +116,17 @@ func GetPoll(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting poll", "message": err.Error()})
 		return
 	}
-	c.JSON(200, poll)
+    // Marshal the poll object into JSON and send the response
+    jsonBytes, err := json.Marshal(poll)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON", "message": err.Error()})
+        return
+    }
+
+    // Send the JSON response with the appropriate MIME type
+	fmt.Println(poll)
+    c.Data(http.StatusOK, "application/json", jsonBytes)
+	// c.JSON(200, poll)
 }
 
 // @Router /polls [get]
