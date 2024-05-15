@@ -32,6 +32,5 @@ func hashPassword(password string) string {
 	hash := sha256.New()
 	hash.Write([]byte(password))
 	hashedBytes := hash.Sum(nil)
-	hashedPassword := hex.EncodeToString(hashedBytes)
-	return hashedPassword
+	return hex.EncodeToString(hashedBytes)
 }

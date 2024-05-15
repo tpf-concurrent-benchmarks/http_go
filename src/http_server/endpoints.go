@@ -6,7 +6,6 @@ import (
 	models "http_go/http_server/models"
 	"time"
 	db "http_go/http_server/database"
-	"fmt"
 )
 
 // @BasePath /api/v1
@@ -36,7 +35,6 @@ func CreateUser(c *gin.Context) {
 	// Add username to the database
 	err := db.InsertUser(c, user.Username, hashedPassword)
 	if err != nil {
-		fmt.Println(hashedPassword)
 		c.JSON(500, gin.H{"error": "Failed to add user"})
 		return
 	}
