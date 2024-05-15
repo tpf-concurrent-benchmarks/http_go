@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"github.com/joho/godotenv"
 	"log"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 func LoadEnv() {
@@ -24,4 +26,12 @@ func getEnvInt(key string, defaultValue int) int {
 		return defaultValue
 	}
 	return val
+}
+
+func hashPassword(password string) string {
+	hash := sha256.New()
+	hash.Write([]byte(password))
+	hashedBytes := hash.Sum(nil)
+	hashedPassword := hex.EncodeToString(hashedBytes)
+	return hashedPassword
 }

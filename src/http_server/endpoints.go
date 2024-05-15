@@ -6,6 +6,7 @@ import (
 	models "http_go/http_server/models"
 	"time"
 	db "http_go/http_server/database"
+	"fmt"
 )
 
 // @BasePath /api/v1
@@ -30,9 +31,12 @@ func CreateUser(c *gin.Context) {
 
 	// Check if username already exists
 
+	//hash password
+	hashedPassword := hashPassword(user.HashedPassword)
 	// Add username to the database
-	err := db.InsertUser(c, user.Username, user.HashedPassword)
+	err := db.InsertUser(c, user.Username, hashedPassword)
 	if err != nil {
+		fmt.Println(hashedPassword)
 		c.JSON(500, gin.H{"error": "Failed to add user"})
 		return
 	}
@@ -58,7 +62,8 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	if userData.HashedPassword != user.HashedPassword {
+	hashedPassword := hashPassword(user.HashedPassword)
+	if userData.HashedPassword != hashedPassword {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
