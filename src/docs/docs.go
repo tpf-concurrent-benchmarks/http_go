@@ -276,9 +276,6 @@ const docTemplate = `{
                 },
                 "poll_id": {
                     "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         }

@@ -144,10 +144,6 @@ func Vote(jwtManager *JWTManager, c *gin.Context) {
 
 	claims, err := processToken(jwtManager, c)
 	if err != nil { return }
-	if claims["sub"].(string) != vote.Username {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
 
 	err = db.InsertVote(c, vote, claims["id"].(string))
 	if err != nil {

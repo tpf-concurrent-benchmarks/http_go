@@ -21,8 +21,6 @@ definitions:
         type: integer
       poll_id:
         type: string
-      username:
-        type: string
     type: object
 info:
   contact: {}
