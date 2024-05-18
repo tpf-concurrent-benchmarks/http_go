@@ -7,6 +7,11 @@ import (
 	"log"
 	"crypto/sha256"
 	"encoding/hex"
+	db "http_go/http_server/database"
+	"fmt"
+	"github.com/fergusstrange/embedded-postgres"
+	"os/signal"
+	"syscall"
 )
 
 func LoadEnv() {
@@ -33,4 +38,19 @@ func hashPassword(password string) string {
 	hash.Write([]byte(password))
 	hashedBytes := hash.Sum(nil)
 	return hex.EncodeToString(hashedBytes)
+}
+
+func cleanup(postgres *embeddedpostgres.EmbeddedPostgres) {
+	db.CloseDatabase(postgres)
+    fmt.Println("cleanup")
+}
+
+func SigHandler(postgres *embeddedpostgres.EmbeddedPostgres) {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		cleanup(postgres)
+		os.Exit(1)
+	}()
 }
