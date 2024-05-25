@@ -15,7 +15,7 @@ func setupRouter(db_controller *sql.DB) *gin.Engine {
 
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
-	v1 := r.Group("/api/v1")
+	v1 := r.Group("/api")
 	v1.Use(db.DatabaseMiddleware(db_controller))
 	
 	v1.POST("/users", server.CreateUser)

@@ -30,7 +30,7 @@ func createTables(db *sql.DB) error {
 
 func createUserTable(db *sql.DB) error {
 	sqlStatement := `
-	CREATE TABLE users (
+	CREATE TABLE IF NOT EXISTS users (
 		id TEXT PRIMARY KEY,
 		username CHAR(30) NOT NULL,
 		password CHAR(64) NOT NULL
@@ -41,7 +41,7 @@ func createUserTable(db *sql.DB) error {
 
 func createPollTable(db *sql.DB) error {
 	sqlStatement := `
-	CREATE TABLE polls (
+	CREATE TABLE IF NOT EXISTS polls (
 		poll_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
 		creator_id UUID NOT NULL,
 		poll_topic TEXT NOT NULL
@@ -52,7 +52,7 @@ func createPollTable(db *sql.DB) error {
 
 func createPollOptionsTable(db *sql.DB) error {
 	sqlStatement := `
-	CREATE TABLE poll_options (
+	CREATE TABLE IF NOT EXISTS poll_options (
 		poll_id UUID,
 		option_num INT,
 		option_text TEXT NOT NULL,
@@ -64,7 +64,7 @@ func createPollOptionsTable(db *sql.DB) error {
 
 func createVotesTable(db *sql.DB) error {
 	sqlStatement := `
-	CREATE TABLE votes (
+	CREATE TABLE IF NOT EXISTS votes (
 		poll_id UUID,
 		user_id UUID,
 		option_num INT NOT NULL,

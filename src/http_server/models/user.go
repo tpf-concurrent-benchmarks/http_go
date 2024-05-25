@@ -6,11 +6,11 @@ type User struct {
 
 type UserInDB struct {
 	User
-	HashedPassword string `json:"hashed_password"`
+	Password string `json:"password"`
 }
 
 type UserData struct {
 	Username string `json:"username"`
-	HashedPassword string `json:"hashed_password"`
+	HashedPassword string `json:"password"`
 	ID string `json:"id"`
 }

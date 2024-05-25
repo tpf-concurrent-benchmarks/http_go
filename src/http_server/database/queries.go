@@ -7,12 +7,13 @@ import (
 	"database/sql"
 )
 
-func InsertUser(c *gin.Context, username string, password string) error {
+func InsertUser(c *gin.Context, username string, password string) (string, error) {
 	//TODO: check if user already exists
 	db := getDB(c)
-	sqlStatement := `INSERT INTO users (id, username, password) VALUES (uuid_generate_v4(), $1, $2)`
-	_, err := db.Exec(sqlStatement, username, password)
-	return err
+	sqlStatement := `INSERT INTO users (id, username, password) VALUES (uuid_generate_v4(), $1, $2) RETURNING id`
+	var id string
+	err := db.QueryRow(sqlStatement, username, password).Scan(&id)
+	return id, err
 }
 
 func GetUserPassword(c *gin.Context, username string) (string, error) {

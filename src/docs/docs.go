@@ -260,7 +260,7 @@ const docTemplate = `{
         "models.UserInDB": {
             "type": "object",
             "properties": {
-                "hashed_password": {
+                "password": {
                     "type": "string"
                 },
                 "username": {

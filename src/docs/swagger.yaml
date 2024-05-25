@@ -10,7 +10,7 @@ definitions:
     type: object
   models.UserInDB:
     properties:
-      hashed_password:
+      password:
         type: string
       username:
         type: string

@@ -33,13 +33,29 @@ func CreateUser(c *gin.Context) {
 	// Check if username already exists
 
 	//hash password
-	hashedPassword := hashPassword(user.HashedPassword)
+	Password := hashPassword(user.Password)
 	// Add username to the database
-	err := db.InsertUser(c, user.Username, hashedPassword)
+	ID, err := db.InsertUser(c, user.Username, Password)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to add user"})
 		return
 	}
+
+	tokenData := map[string]interface{}{
+		"sub": user.Username,
+		"id":  ID,
+	}
+
+	token, err := jwtManager.CreateJWTToken(tokenData, time.Minute*time.Duration(jwtManager.AccessTokenExpireMinutes))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token": token,
+		"token_type":   "bearer",
+	})
 
 	c.JSON(200, gin.H{"message": "User added successfully"})
 }
@@ -62,8 +78,8 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 		return
 	}
 
-	hashedPassword := hashPassword(user.HashedPassword)
-	if userData.HashedPassword != hashedPassword {
+	Password := hashPassword(user.Password)
+	if userData.HashedPassword != Password {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
