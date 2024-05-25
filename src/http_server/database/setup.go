@@ -6,6 +6,7 @@ import (
 	"os"
 	"github.com/fergusstrange/embedded-postgres"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 // part of the code was taken from https://nerocui.com/2019/08/04/how-to-use-sql-database-in-golang/
@@ -16,14 +17,26 @@ func InitializeDatabase() *sql.DB {
 		host=%s port=%s user=%s 
 		password=%s dbname=%s sslmode=disable`,
 		host, port, user, password, name)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
+	var db *sql.DB
+	for {
+		db, err = sql.Open("postgres", psqlInfo)
+		if err != nil {
+			fmt.Printf("Error opening database: %v. Retrying in 3 seconds...\n", err)
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		
+		err = db.Ping()
+		if err != nil {
+			fmt.Printf("Error pinging database: %v. Retrying in 3 seconds...\n", err)
+			time.Sleep(3 * time.Second)
+			continue
+		}
+
+		fmt.Println("Connected to PostgreSQL")
+		break
 	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
+	
 	fmt.Println("Connected to PostgreSQL")
 	err = createTables(db)
 	if err != nil {

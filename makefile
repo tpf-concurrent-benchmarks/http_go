@@ -1,3 +1,12 @@
+-include src/.env
+
+.EXPORT_ALL_VARIABLES:
+	APP_HOST=${APP_HOST}
+	APP_PORT=${APP_PORT}
+	POSTGRES_USER=${POSTGRES_USER}
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+	POSTGRES_DB=${POSTGRES_DB}
+
 init_docs:
 	cd src && /home/vboxuser/go/bin/swag init
 

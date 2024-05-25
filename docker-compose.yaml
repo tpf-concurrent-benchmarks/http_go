@@ -79,6 +79,20 @@ services:
     deploy:
       restart_policy:
         condition: none
+    depends_on:
+      - postgres_db
+
+  postgres_db:
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: postgres #TODO: parametrize
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - ./data/postgres_data:/data/postgres
+    ports:
+      - "5432:5432"
 
 volumes:
   grafana_config:

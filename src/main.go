@@ -39,9 +39,9 @@ func setupRouter(db_controller *sql.DB) *gin.Engine {
 
 func main() {
 	server.LoadEnv()
-	postgres := db.StartDatabase()
-	defer db.CloseDatabase(postgres)
-	server.SigHandler(postgres)
+	// postgres := db.StartDatabase()
+	// defer db.CloseDatabase(postgres)
+	// server.SigHandler(postgres)
 	db_controller := db.InitializeDatabase()
 	r := setupRouter(db_controller)
 
