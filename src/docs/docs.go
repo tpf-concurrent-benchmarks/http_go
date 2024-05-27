@@ -44,7 +44,23 @@ const docTemplate = `{
                 }
             }
         },
-        "/poll": {
+        "/polls": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Polls object",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Polls not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "parameters": [
                     {
@@ -83,7 +99,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/poll/{id}": {
+        "/polls/{id}": {
             "get": {
                 "parameters": [
                     {
@@ -108,66 +124,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/poll/{id}/vote": {
-            "post": {
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "access_token",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "name": "token_type",
-                        "in": "header"
-                    },
-                    {
-                        "description": "Vote object",
-                        "name": "vote",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Vote"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Voted successfully",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request payload",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/polls": {
-            "get": {
-                "responses": {
-                    "200": {
-                        "description": "Polls object",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Polls not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/polls/{id}": {
+            },
             "delete": {
                 "parameters": [
                     {
@@ -197,6 +154,50 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Poll not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/polls/{id}/vote": {
+            "post": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Poll ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Option ID",
+                        "name": "option",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "access_token",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "name": "token_type",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Voted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
                         "schema": {
                             "type": "string"
                         }
@@ -264,17 +265,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Vote": {
-            "type": "object",
-            "properties": {
-                "option": {
-                    "type": "integer"
-                },
-                "poll_id": {
                     "type": "string"
                 }
             }

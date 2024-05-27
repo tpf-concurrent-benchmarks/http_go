@@ -7,6 +7,7 @@ import (
 	"time"
 	db "http_go/http_server/database"
 	"fmt"
+	"strconv"
 	"encoding/json"
 )
 
@@ -21,7 +22,7 @@ import (
 // @Success 200 {string} string "User added successfully"
 // @Failure 400 {string} string "Invalid request payload"
 // @Router /users [post]
-func CreateUser(c *gin.Context) {
+func CreateUser(jwtManager *JWTManager, c *gin.Context) {
 	var user models.UserInDB
 
 	// Bind JSON request body to username variable
@@ -57,7 +58,7 @@ func CreateUser(c *gin.Context) {
 		"token_type":   "bearer",
 	})
 
-	c.JSON(200, gin.H{"message": "User added successfully"})
+	// c.JSON(200, gin.H{"message": "User added successfully"})
 }
 
 // @Router /login [post]
@@ -101,7 +102,7 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 	})
 }
 
-// @Router /poll [post]
+// @Router /polls [post]
 // @Param token header models.Token true "Bearer token"
 // @Param poll body models.Poll true "Poll object"
 // @Success 200 {string} string "Poll created successfully"
@@ -118,10 +119,10 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 	}
 	ID, err := db.InsertPoll(c, user_id, poll)
 
-	c.JSON(200, gin.H{"message": "Poll created successfully", "id": ID})
+	c.JSON(200, gin.H{"id": ID})
 }
 
-// @Router /poll/{id} [get]
+// @Router /polls/{id} [get]
 // @Param id path string true "Poll ID"
 // @Success 200 {string} string "PollWithVotes object"
 // @Failure 404 {string} string "Poll not found"
@@ -158,17 +159,26 @@ func GetPolls(c *gin.Context) {
 	c.JSON(200, gin.H{"polls": polls})
 }
 
-// @Router /poll/{id}/vote [post]
+// @Router /polls/{id}/vote [post]
+// @Param id path string true "Poll ID"
+// @Param option query int true "Option ID"
 // @Param token header models.Token true "Bearer token"
-// @Param vote body models.Vote true "Vote object"
 // @Success 200 {string} string "Voted successfully"
 // @Failure 400 {string} string "Invalid request payload"
 func Vote(jwtManager *JWTManager, c *gin.Context) {
 	var vote models.Vote
-	if err := c.ShouldBindJSON(&vote); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+	// if err := c.ShouldBindJSON(&vote); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+	// 	return
+	// }
+	pollID := c.Param("id")
+    option, err := strconv.Atoi(c.Query("option"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload, option must be an integer"})
 		return
 	}
+	vote.PollID = pollID
+	vote.Option = option
 
 	claims, err := processToken(jwtManager, c)
 	if err != nil { return }

@@ -15,13 +15,6 @@ definitions:
       username:
         type: string
     type: object
-  models.Vote:
-    properties:
-      option:
-        type: integer
-      poll_id:
-        type: string
-    type: object
 info:
   contact: {}
 paths:
@@ -43,7 +36,17 @@ paths:
           description: Invalid request body
           schema:
             type: string
-  /poll:
+  /polls:
+    get:
+      responses:
+        "200":
+          description: Polls object
+          schema:
+            type: string
+        "404":
+          description: Polls not found
+          schema:
+            type: string
     post:
       parameters:
       - in: header
@@ -67,58 +70,6 @@ paths:
           description: Invalid request payload
           schema:
             type: string
-  /poll/{id}:
-    get:
-      parameters:
-      - description: Poll ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: PollWithVotes object
-          schema:
-            type: string
-        "404":
-          description: Poll not found
-          schema:
-            type: string
-  /poll/{id}/vote:
-    post:
-      parameters:
-      - in: header
-        name: access_token
-        type: string
-      - in: header
-        name: token_type
-        type: string
-      - description: Vote object
-        in: body
-        name: vote
-        required: true
-        schema:
-          $ref: '#/definitions/models.Vote'
-      responses:
-        "200":
-          description: Voted successfully
-          schema:
-            type: string
-        "400":
-          description: Invalid request payload
-          schema:
-            type: string
-  /polls:
-    get:
-      responses:
-        "200":
-          description: Polls object
-          schema:
-            type: string
-        "404":
-          description: Polls not found
-          schema:
-            type: string
   /polls/{id}:
     delete:
       parameters:
@@ -140,6 +91,50 @@ paths:
             type: string
         "404":
           description: Poll not found
+          schema:
+            type: string
+    get:
+      parameters:
+      - description: Poll ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: PollWithVotes object
+          schema:
+            type: string
+        "404":
+          description: Poll not found
+          schema:
+            type: string
+  /polls/{id}/vote:
+    post:
+      parameters:
+      - description: Poll ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Option ID
+        in: query
+        name: option
+        required: true
+        type: integer
+      - in: header
+        name: access_token
+        type: string
+      - in: header
+        name: token_type
+        type: string
+      responses:
+        "200":
+          description: Voted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
           schema:
             type: string
   /users:
