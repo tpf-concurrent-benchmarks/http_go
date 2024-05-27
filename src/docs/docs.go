@@ -19,7 +19,7 @@ const docTemplate = `{
             "post": {
                 "parameters": [
                     {
-                        "description": "Username and hashed password",
+                        "description": "Username and password",
                         "name": "userInDB",
                         "in": "body",
                         "required": true,
@@ -65,13 +65,10 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "access_token",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "name": "token_type",
-                        "in": "header"
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "description": "Poll object",
@@ -129,13 +126,10 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "access_token",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "name": "token_type",
-                        "in": "header"
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -180,13 +174,10 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "access_token",
-                        "in": "header"
-                    },
-                    {
-                        "type": "string",
-                        "name": "token_type",
-                        "in": "header"
+                        "description": "Bearer",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {

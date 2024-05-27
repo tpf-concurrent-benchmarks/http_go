@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 type JWTManager struct {
@@ -61,26 +62,27 @@ func (jm *JWTManager) DecodeJWTToken(tokenStr string) (jwt.MapClaims, error) {
 }
 
 func processToken(jwtManager *JWTManager, c *gin.Context) (jwt.MapClaims, error) {
-	// Check if the "Access_token" header exists in the request
-	if accessTokenValues, ok := c.Request.Header["Access_token"]; !ok || len(accessTokenValues) == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Access token is missing"})
-		return nil, fmt.Errorf("access token is missing")
-	}
-	if tokenTypeValues, ok := c.Request.Header["Access_token"]; !ok || len(tokenTypeValues) == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token type is missing"})
-		return nil, fmt.Errorf("token type is missing")
-	}
-	access_token := c.Request.Header["Access_token"][0]
-	token_type := c.Request.Header["Token_type"][0]
-	if token_type != "bearer" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Un supported token type"})
-		return nil, fmt.Errorf("unsupported token type")
+	// Check if the "Authorization" header exists in the request
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+		return nil, fmt.Errorf("authorization header is missing")
 	}
 
-	claims, err := jwtManager.DecodeJWTToken(access_token)
+	// Split the header value to get the token
+	authValues := strings.Split(authHeader, " ")
+	if len(authValues) != 2 || authValues[0] != "Bearer" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
+		return nil, fmt.Errorf("invalid authorization header format")
+	}
+
+	accessToken := authValues[1]
+
+	claims, err := jwtManager.DecodeJWTToken(accessToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 		return nil, err
 	}
+
 	return claims, nil
 }

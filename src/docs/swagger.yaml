@@ -21,7 +21,7 @@ paths:
   /login:
     post:
       parameters:
-      - description: Username and hashed password
+      - description: Username and password
         in: body
         name: userInDB
         required: true
@@ -49,11 +49,10 @@ paths:
             type: string
     post:
       parameters:
-      - in: header
-        name: access_token
-        type: string
-      - in: header
-        name: token_type
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
         type: string
       - description: Poll object
         in: body
@@ -73,11 +72,10 @@ paths:
   /polls/{id}:
     delete:
       parameters:
-      - in: header
-        name: access_token
-        type: string
-      - in: header
-        name: token_type
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
         type: string
       - description: Poll ID
         in: path
@@ -122,11 +120,10 @@ paths:
         name: option
         required: true
         type: integer
-      - in: header
-        name: access_token
-        type: string
-      - in: header
-        name: token_type
+      - description: Bearer
+        in: header
+        name: Authorization
+        required: true
         type: string
       responses:
         "200":

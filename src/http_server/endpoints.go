@@ -62,7 +62,7 @@ func CreateUser(jwtManager *JWTManager, c *gin.Context) {
 }
 
 // @Router /login [post]
-// @Param userInDB body models.UserInDB true "Username and hashed password"
+// @Param userInDB body models.UserInDB true "Username and password"
 // @Success 200 {string} string "access_token"
 // @Failure 400 {string} string "Invalid request body"
 func Login(jwtManager *JWTManager, c *gin.Context) {
@@ -103,7 +103,7 @@ func Login(jwtManager *JWTManager, c *gin.Context) {
 }
 
 // @Router /polls [post]
-// @Param token header models.Token true "Bearer token"
+// @Param Authorization header string true "Bearer"
 // @Param poll body models.Poll true "Poll object"
 // @Success 200 {string} string "Poll created successfully"
 // @Failure 400 {string} string "Invalid request payload"
@@ -155,6 +155,11 @@ func GetPolls(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Error getting polls", "message": err.Error()})
 		return
 	}
+	
+	if polls == nil {
+		c.JSON(200, gin.H{"polls": []models.Poll{}})
+		return
+	}
 
 	c.JSON(200, gin.H{"polls": polls})
 }
@@ -162,7 +167,7 @@ func GetPolls(c *gin.Context) {
 // @Router /polls/{id}/vote [post]
 // @Param id path string true "Poll ID"
 // @Param option query int true "Option ID"
-// @Param token header models.Token true "Bearer token"
+// @Param Authorization header string true "Bearer"
 // @Success 200 {string} string "Voted successfully"
 // @Failure 400 {string} string "Invalid request payload"
 func Vote(jwtManager *JWTManager, c *gin.Context) {
@@ -193,7 +198,7 @@ func Vote(jwtManager *JWTManager, c *gin.Context) {
 }
 
 // @Router /polls/{id} [delete]
-// @Param token header models.Token true "Bearer token"
+// @Param Authorization header string true "Bearer"
 // @Param id path string true "Poll ID"
 // @Success 200 {string} string "Poll deleted successfully"
 // @Failure 404 {string} string "Poll not found"
