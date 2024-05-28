@@ -117,6 +117,10 @@ func CreatePoll(jwtManager *JWTManager, c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
+	if len(poll.Options) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Poll must have at least 2 options"})
+		return
+	}
 	ID, err := db.InsertPoll(c, user_id, poll)
 
 	c.JSON(200, gin.H{"id": ID})
