@@ -10,19 +10,9 @@ type PollWithVotes struct {
 	Options []Option `json:"options"`
 }
 
-type PollInDB struct {
-	PollWithVotes
-	ID string `json:"id"`
-}
-
 type Poll struct {
 	Title   string   `json:"title"`
 	Options []string `json:"options"`
-}
-
-type PollGet struct {
-	Poll
-	ID string `json:"id"`
 }
 
 type PollMeta struct {
