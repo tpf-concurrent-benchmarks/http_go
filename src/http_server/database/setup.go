@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"github.com/fergusstrange/embedded-postgres"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -43,22 +42,6 @@ func InitializeDatabase() *sql.DB {
 		panic(err)
 	}
 	return db
-}
-
-func StartDatabase() *embeddedpostgres.EmbeddedPostgres {
-	postgres := embeddedpostgres.NewDatabase()
-	err := postgres.Start()
-	if err != nil {
-		panic(err)
-	}
-	return postgres
-}
-
-func CloseDatabase(postgres *embeddedpostgres.EmbeddedPostgres) {
-	err := postgres.Stop()
-	if err != nil {
-		panic(err)
-	}
 }
 
 func DatabaseMiddleware(db *sql.DB) gin.HandlerFunc {
