@@ -10,6 +10,7 @@ import (
 	db "http_go/http_server/database"
 )
 
+// sets up the routes of the api
 func setupRouter(db_controller *sql.DB) *gin.Engine {
 	jwtManager := server.NewJWTManager()
 

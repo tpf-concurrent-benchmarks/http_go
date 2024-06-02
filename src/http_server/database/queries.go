@@ -16,14 +16,6 @@ func InsertUser(c *gin.Context, username string, password string) (string, error
 	return id, err
 }
 
-func GetUserID(c *gin.Context, username string) (string, error) {
-	db := getDB(c)
-	sqlStatement := `SELECT id FROM users WHERE username=$1`
-	var id string
-	err := db.QueryRow(sqlStatement, username).Scan(&id)
-	return id, err
-}
-
 func GetUser(c *gin.Context, username string) (models.UserData, error) {
 	db := getDB(c)
 	sqlStatement := `SELECT id, username, password FROM users WHERE username=$1`

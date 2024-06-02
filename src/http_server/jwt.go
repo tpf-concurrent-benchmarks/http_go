@@ -17,6 +17,7 @@ type JWTManager struct {
 	Algorithm                jwt.SigningMethod
 }
 
+// initializes the configuration for the jwt tokens
 func NewJWTManager() *JWTManager {
 	if os.Getenv("ALGORITHM") == "HS256" {
 		return &JWTManager{
@@ -44,6 +45,8 @@ func (jm *JWTManager) CreateJWTToken(data map[string]interface{}, expiresDelta t
 	return token.SignedString([]byte(jm.SecretKey))
 }
 
+// decodes the jwt token, it checks for a valid encoding
+// and if the token has expired
 func (jm *JWTManager) DecodeJWTToken(tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jm.SecretKey), nil
@@ -61,6 +64,9 @@ func (jm *JWTManager) DecodeJWTToken(tokenStr string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
+// processes the jwt token from the header Authorization
+// the format of the header should be "Bearer <token>"
+// it also decodes the token and returns the claims
 func processToken(jwtManager *JWTManager, c *gin.Context) (jwt.MapClaims, error) {
 	// Check if the "Authorization" header exists in the request
 	authHeader := c.GetHeader("Authorization")

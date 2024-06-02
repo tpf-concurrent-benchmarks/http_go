@@ -16,6 +16,8 @@ func LoadEnv() {
 	}
 }
 
+// fetch an int from an environment variable
+// returns the default value if the key is not found or the value is not an int
 func getEnvInt(key string, defaultValue int) int {
 	valStr := os.Getenv(key)
 	if valStr == "" {

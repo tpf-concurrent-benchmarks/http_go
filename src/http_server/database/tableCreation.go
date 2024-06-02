@@ -4,6 +4,7 @@ import (
 	"database/sql"
 )
 
+// creates all the tables in the database
 func createTables(db *sql.DB) error {
 	err := activateExtension(db)
 	if err != nil {
@@ -39,6 +40,8 @@ func createUserTable(db *sql.DB) error {
 	return err
 }
 
+// this table stores the polls with the creator_id being the user who created the poll
+// and the poll_topic being the topic of the poll as a reference
 func createPollTable(db *sql.DB) error {
 	sqlStatement := `
 	CREATE TABLE IF NOT EXISTS polls (
@@ -50,6 +53,7 @@ func createPollTable(db *sql.DB) error {
 	return err
 }
 
+// this table stores the options for each poll
 func createPollOptionsTable(db *sql.DB) error {
 	sqlStatement := `
 	CREATE TABLE IF NOT EXISTS poll_options (
@@ -62,6 +66,8 @@ func createPollOptionsTable(db *sql.DB) error {
 	return err
 }
 
+// this table stores the votes as the relation between the user and the poll
+// the option number marks which poll option the user voted for
 func createVotesTable(db *sql.DB) error {
 	sqlStatement := `
 	CREATE TABLE IF NOT EXISTS votes (
